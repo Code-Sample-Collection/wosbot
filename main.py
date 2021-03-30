@@ -1,9 +1,10 @@
-from fastapi import FastAPI
+from fastapi import BackgroundTasks, FastAPI
 from pydantic import BaseModel
 from uuid import UUID
 from pathlib import Path
 from datetime import datetime
 import configparser
+import ffmpeg
 
 
 config = configparser.ConfigParser()
@@ -37,12 +38,26 @@ class BiliRecFinish(BaseModel):
     EndRecordTime: datetime
 
 
+def rec_flv2mp4(flv_path: Path):
+    print(f'Handling {flv_path}')
+    print(f'isfile {flv_path.is_file()}')
+    out_fname = flv_path.stem + '.mp4'
+    out_mp4 = flv_path.parent.joinpath(out_fname)
+    (
+        ffmpeg
+        .input(flv_path)
+        .output(filename=out_mp4, codec='copy')
+        .overwrite_output()
+        .run()
+    )
+    print(f'flv2mp4 finished: {out_fname}')
+
+
 @app.post("/bili_rec/")
-async def rec_finish(msg: BiliRecFinish):
+async def rec_finish(msg: BiliRecFinish, background_tasks: BackgroundTasks):
     print(msg)
     full_path = VEDIO_ROOT.joinpath(msg.RelativePath) 
     rec_duration = msg.EndRecordTime - msg.StartRecordTime
-    print(full_path)
-    print(f'isfile {full_path.is_file()}')
     print(rec_duration)
+    background_tasks.add_task(rec_flv2mp4, full_path)
     return {"message": "Runing ffmpeg..."}
