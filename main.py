@@ -5,11 +5,15 @@ from pathlib import Path
 from datetime import datetime
 import configparser
 import ffmpeg
+import shutil
 
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 VEDIO_ROOT = Path(config['bili.rec']['root_path'])
+CLOUD_ROOT = Path(config['cloud']['target_path'])
+DIR_NAME_MAP = eval(config['bili.rec']['roomid_map'])
+
 
 app = FastAPI()
 
@@ -38,7 +42,7 @@ class BiliRecFinish(BaseModel):
     EndRecordTime: datetime
 
 
-def rec_flv2mp4(flv_path: Path):
+def rec_flv2mp4(flv_path: Path, msg: BiliRecFinish):
     print(f'Handling {flv_path}')
     print(f'isfile {flv_path.is_file()}')
     out_fname = flv_path.stem + '.mp4'
@@ -51,6 +55,11 @@ def rec_flv2mp4(flv_path: Path):
         .run()
     )
     print(f'flv2mp4 finished: {out_fname}')
+    cld_dir = DIR_NAME_MAP[msg.RoomId]
+    mmdd = out_fname[:6]
+    cld = CLOUD_ROOT.joinpath(cld_dir, mmdd, out_fname)
+    shutil.copyfile(out_mp4, cld)
+    print(f'copy2cloud finished: {cld}')
 
 
 @app.post("/bili_rec/")
@@ -59,5 +68,5 @@ async def rec_finish(msg: BiliRecFinish, background_tasks: BackgroundTasks):
     full_path = VEDIO_ROOT.joinpath(msg.RelativePath) 
     rec_duration = msg.EndRecordTime - msg.StartRecordTime
     print(rec_duration)
-    background_tasks.add_task(rec_flv2mp4, full_path)
+    background_tasks.add_task(rec_flv2mp4, full_path, msg)
     return {"message": "Runing ffmpeg..."}
