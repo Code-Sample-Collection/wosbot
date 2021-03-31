@@ -15,3 +15,6 @@ pip install nb-cli
 mkdir nbot
 nb init
 ```
+
+### nbot 安装插件
+

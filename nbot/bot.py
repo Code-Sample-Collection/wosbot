@@ -4,14 +4,15 @@
 import nonebot
 from nonebot.adapters.mirai import Bot as MIRAIBot
 
+
 # Custom your logger
 # 
-# from nonebot.log import logger, default_format
-# logger.add("error.log",
-#            rotation="00:00",
-#            diagnose=False,
-#            level="ERROR",
-#            format=default_format)
+from nonebot.log import logger, default_format
+logger.add("./log/error.log",
+           rotation="00:00",
+           diagnose=False,
+           level="ERROR",
+           format=default_format)
 
 # You can pass some keyword args config to init function
 nonebot.init()
@@ -20,6 +21,11 @@ app = nonebot.get_asgi()
 driver = nonebot.get_driver()
 driver.register_adapter("mirai", MIRAIBot)
 
+nonebot.load_builtin_plugins()  # 加载 nonebot 内置插件
+nonebot.load_plugins("src/plugins")
+nonebot.load_plugin("nonebot_plugin_test")
+# nonebot.load_plugin("nonebot_plugin_status")
+# nonebot.load_plugin("haruka_bot")
 nonebot.load_from_toml("pyproject.toml")
 
 # Modify some config / config depends on loaded configs
