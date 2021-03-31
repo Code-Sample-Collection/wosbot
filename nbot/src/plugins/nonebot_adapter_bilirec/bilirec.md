@@ -5,6 +5,18 @@
 协议详情参见: [Webhook - 文档 - B站录播姬](https://rec.danmuji.org/docs/desktop/webhook/)
 
 
+`bilirec.bot` 模块
+------------------
+
+## *class* `Bot`
+
+基类：`nonebot.adapters._base.Bot`
+
+BiliRec WebHook 协议适配。继承属性参考 BaseBot 。
+
+### *property* `type`
++ 返回: "bilirec"
+
 ### `bilirec.config` 模块
 
 无需传参
