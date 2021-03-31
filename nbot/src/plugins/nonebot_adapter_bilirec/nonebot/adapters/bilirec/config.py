@@ -2,7 +2,9 @@ from pydantic import BaseSettings
 
 
 class Config(BaseSettings):
-    # Your Config Here
+    """BiliRec 配置类
 
+    WebHook 无需配置
+    """
     class Config:
         extra = "ignore"
